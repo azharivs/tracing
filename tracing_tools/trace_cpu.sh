@@ -1,4 +1,21 @@
 #!/bin/bash
+echo "Usage:"
+echo "./trace_cpu.sh [tracing_session_name] [number_of_processes_to_spawn] [max_iterations]"
+
+if [ $1 == "" ] 
+then 
+	exit 
+fi
+if [ $2 == "" ] 
+then 
+	exit 
+fi
+if [ $3 == "" ] 
+then 
+	exit 
+fi
+
+
 
 #create lttng session and initialize 
 lttng create $1
@@ -14,7 +31,10 @@ lttng start
 sleep 1
 
 #start application to be traced
-../cpu_intensive/Debug/cpu_intensive $2
+for i in `eval echo {1..$2}` 
+do
+	../cpu_intensive/Debug/cpu_intensive $3 &
+done
 
 #stop tracing
 sleep 1
