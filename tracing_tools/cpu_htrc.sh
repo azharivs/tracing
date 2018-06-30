@@ -1,21 +1,26 @@
 #!/bin/bash
 echo "Usage:"
-echo "./trace_cpu.sh [tracing_session_name] [number_of_processes_to_spawn] [max_iterations]"
+echo "./cpu_htrc.sh [tracing_session_name] [number_of_processes_to_spawn] [max_iterations] [user@vm_ip]"
 
-if [ $1 == "" ] 
-then 
+if [ "$1" = "" ] 
+then
 	exit 
 fi
-if [ $2 == "" ] 
-then 
-	exit 
-fi
-if [ $3 == "" ] 
+
+if [ "$2" == "" ] 
 then 
 	exit 
 fi
 
+if [ "$3" == "" ] 
+then 
+	exit 
+fi
 
+if [ "$4" == "" ]
+then 
+	exit
+fi
 
 #create lttng session and initialize 
 lttng create $1
@@ -30,12 +35,9 @@ lttng enable-event -c ss -k -a
 lttng start
 sleep 1
 
-#start application to be traced
-for i in `eval echo {1..$2}` 
-do
-	../cpu_intensive/Debug/cpu_intensive $3 &
-done
-
+#ssh script that spawns application to be traced appropriately on guest
+ssh $4 "nohup ~/tracing/tracing_tools/cpu_intensive.sh $2 $3 "
+wait
 #stop tracing
 sleep 1
 lttng stop
